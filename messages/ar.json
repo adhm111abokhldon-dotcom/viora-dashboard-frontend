@@ -408,7 +408,22 @@
       "current": "ظهرت في آخر مزامنة",
       "historical": "حملة تاريخية",
       "unknown": "حالة المزامنة غير مؤكدة"
-    }
+    },
+    "profitabilityTitle": "ربحية الطلبات المنسوبة",
+    "profitabilityDescription": "الطلبات المسلّمة المنسوبة إلى هذه الحملة. الإنفاق هو إنفاق ويندور لهذه الحملة.",
+    "profitabilityLoading": "جارٍ تحميل الربحية...",
+    "profitabilityError": "تعذّر تحميل الربحية.",
+    "attributedRevenue": "الإيراد المنسوب",
+    "grossContribution": "المساهمة الإجمالية",
+    "marginAfterAds": "الهامش بعد الإعلانات",
+    "roas": "العائد على الإنفاق",
+    "costPerOrder": "التكلفة لكل طلب",
+    "averageOrderValue": "متوسط قيمة الطلب",
+    "attributedOrders": "الطلبات المنسوبة",
+    "attributedOrdersCount": "{count, plural, one {طلب #} other {# طلبات}}",
+    "noAttributedOrders": "لا توجد طلبات مسلّمة منسوبة إلى هذه الحملة بعد.",
+    "orderItems": "{count, plural, one {صنف #} other {# أصناف}}",
+    "orderNetProfit": "الصافي {amount}"
   },
   "orders": {
     "title": "الطلبات",

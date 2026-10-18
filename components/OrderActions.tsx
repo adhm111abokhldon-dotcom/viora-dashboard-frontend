@@ -46,20 +46,16 @@ export default function OrderActions({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-48">
+        {/* Edit is available for orders in every status. */}
+        <DropdownMenuItem
+          render={<Link href={`/orders/${order._id}/edit`} />}
+        >
+          {t("edit")}
+        </DropdownMenuItem>
+
         {order.status === "Pending" && (
           <>
-            <DropdownMenuItem
-              render={<Link href={`/orders/${order._id}/edit`} />}
-            >
-              {t("edit")}
-            </DropdownMenuItem>
-
             <DropdownMenuSeparator />
-          </>
-        )}
-
-        {order.status === "Pending" && (
-          <>
             <DropdownMenuItem
               disabled={isUpdatingStatus}
               onClick={() => onStatusChange(order._id, "Delivered")}
@@ -79,17 +75,23 @@ export default function OrderActions({
         )}
 
         {order.status === "Delivered" && (
-          <DropdownMenuItem
-            disabled={isUpdatingStatus}
-            onClick={() => onStatusChange(order._id, "Cancelled")}
-          >
-            <XCircle className={`size-4 ${statusStyles.Cancelled}`} />
-            {t("cancel")}
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              disabled={isUpdatingStatus}
+              onClick={() => onStatusChange(order._id, "Cancelled")}
+            >
+              <XCircle className={`size-4 ${statusStyles.Cancelled}`} />
+              {t("cancel")}
+            </DropdownMenuItem>
+          </>
         )}
 
         {order.status === "Cancelled" && (
-          <DropdownMenuItem disabled>{t("noChanges")}</DropdownMenuItem>
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled>{t("noChanges")}</DropdownMenuItem>
+          </>
         )}
 
         <DropdownMenuSeparator />

@@ -42,6 +42,7 @@ export const BUSINESS_QUERY_ROOTS = [
   "adPerformance",
   "campaignCatalog",
   "campaignProducts",
+  "campaignProfitability",
 ] as const;
 
 /**

@@ -20,11 +20,13 @@ import {
 
 import {
   type CreateOrderData,
+  type CampaignReference,
   getOrderById,
   getProducts,
   updateOrder,
 } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
+import OrderCampaignSelector from "@/components/OrderCampaignSelector";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { useAppToast } from "@/lib/toast";
 import { useInvalidateAll } from "@/lib/queries";
@@ -66,6 +68,7 @@ export default function EditOrderPage() {
 
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
+  const [campaign, setCampaign] = useState<CampaignReference | null>(null);
 
   const [rows, setRows] = useState<Row[]>([]);
 
@@ -114,6 +117,7 @@ export default function EditOrderPage() {
 
     setCustomer(order.customer);
     setPhone(order.phone);
+    setCampaign(order.campaign ?? null);
 
     setRows(
       order.items.map((item) => ({
@@ -391,6 +395,8 @@ export default function EditOrderPage() {
       deliveryCharged: deliveryChargedNumber,
 
       deliveryCost: deliveryCostNumber,
+
+      campaignKey: campaign?.key ?? null,
     });
   }
 
@@ -426,48 +432,7 @@ export default function EditOrderPage() {
     );
   }
 
-  /*
-   * Only pending orders are editable.
-   * Delivered and cancelled orders are historical records, so a direct
-   * visit to this URL must never render an editable form.
-   *
-   * The backend enforces the same rule in PUT /api/orders/:id.
-   */
-  if (order.status !== "Pending") {
-    const statusLabel = {
-      Pending: tStatus("pending"),
-      Delivered: tStatus("delivered"),
-      Cancelled: tStatus("cancelled"),
-    }[order.status];
 
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="flex min-h-[400px] items-center justify-center"
-      >
-        <div className="max-w-md text-center">
-          <h2 className="text-xl font-semibold">
-            {t("cannotEditTitle", { status: statusLabel })}
-          </h2>
-
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("cannotEditDescription", { status: statusLabel })}
-          </p>
-
-          <Button
-            className="mt-5"
-            variant="outline"
-            onClick={() => router.push("/orders")}
-          >
-            <ArrowLeft className="size-4 rtl:-scale-x-100" />
-            {t("backToOrders")}
-          </Button>
-        </div>
-      </motion.div>
-    );
-  }
 
   return (
     <motion.div
@@ -543,6 +508,18 @@ export default function EditOrderPage() {
                   {errors.phone && (
                     <p className="text-xs text-destructive">{errors.phone}</p>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="campaign" className="text-sm font-medium">
+                    {tf("campaign")}
+                  </label>
+
+                  <OrderCampaignSelector
+                    id="campaign"
+                    value={campaign}
+                    onChange={setCampaign}
+                  />
                 </div>
               </CardContent>
             </Card>

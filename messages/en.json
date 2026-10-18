@@ -408,7 +408,22 @@
       "current": "Seen in latest sync",
       "historical": "Historical campaign",
       "unknown": "Sync status unverified"
-    }
+    },
+    "profitabilityTitle": "Attributed profitability",
+    "profitabilityDescription": "Delivered orders attributed to this campaign. Spend is this campaign's Windsor spend.",
+    "profitabilityLoading": "Loading profitability...",
+    "profitabilityError": "Profitability could not be loaded.",
+    "attributedRevenue": "Attributed revenue",
+    "grossContribution": "Gross contribution",
+    "marginAfterAds": "Margin after ads",
+    "roas": "ROAS",
+    "costPerOrder": "Cost per order",
+    "averageOrderValue": "Average order value",
+    "attributedOrders": "Attributed orders",
+    "attributedOrdersCount": "{count, plural, one {# order} other {# orders}}",
+    "noAttributedOrders": "No delivered orders are attributed to this campaign yet.",
+    "orderItems": "{count, plural, one {# item} other {# items}}",
+    "orderNetProfit": "Net {amount}"
   },
   "orders": {
     "title": "Orders",

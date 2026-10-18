@@ -15,7 +15,9 @@ import ProductsLoading from "@/components/ProductsLoading";
 import { Pagination } from "@/components/ui/Pagination";
 import {
   getCampaignProducts,
+  getCampaignProfitability,
   linkProductCampaign,
+  type CampaignProfitabilityResponse,
   unlinkProductCampaign,
 } from "@/lib/api";
 import { formatCurrency, formatNumber } from "@/lib/format";
@@ -24,6 +26,7 @@ import { useAppToast } from "@/lib/toast";
 import { useInvalidateAll } from "@/lib/queries";
 
 const PAGE_SIZE = 20;
+const PROFIT_PAGE_SIZE = 10;
 
 export default function CampaignDetailsPage() {
   const t = useTranslations("campaignDetails");
@@ -37,6 +40,7 @@ export default function CampaignDetailsPage() {
     key = "";
   }
   const [page, setPage] = useState(1);
+  const [profitPage, setProfitPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const toast = useAppToast();
@@ -53,6 +57,13 @@ export default function CampaignDetailsPage() {
   const query = useQuery({
     queryKey: ["campaignProducts", key, page, search],
     queryFn: () => getCampaignProducts(key, page, PAGE_SIZE, search),
+    enabled: Boolean(key),
+  });
+
+  const profitQuery = useQuery({
+    queryKey: ["campaignProfitability", key, profitPage],
+    queryFn: () =>
+      getCampaignProfitability(key, { page: profitPage, limit: PROFIT_PAGE_SIZE }),
     enabled: Boolean(key),
   });
 
@@ -163,6 +174,13 @@ export default function CampaignDetailsPage() {
         />
       </div>
 
+      <ProfitabilityCard
+        profitQuery={profitQuery}
+        locale={locale}
+        profitPage={profitPage}
+        onProfitPageChange={setProfitPage}
+      />
+
       <Card className="overflow-hidden shadow-none">
         <CardHeader className="gap-4 border-b border-border sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -248,6 +266,208 @@ export default function CampaignDetailsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function ProfitabilityCard({
+  profitQuery,
+  locale,
+  profitPage,
+  onProfitPageChange,
+}: {
+  profitQuery: {
+    isLoading: boolean;
+    isError: boolean;
+    data?: CampaignProfitabilityResponse;
+    refetch: () => void;
+  };
+  locale: "en" | "ar";
+  profitPage: number;
+  onProfitPageChange: (page: number | ((current: number) => number)) => void;
+}) {
+  const t = useTranslations("campaignDetails");
+  const te = useTranslations("errors");
+  void profitPage;
+
+  return (
+    <Card className="overflow-hidden shadow-none">
+      <CardHeader className="border-b border-border">
+        <CardTitle className="text-base">{t("profitabilityTitle")}</CardTitle>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("profitabilityDescription")}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4 p-4">
+        {profitQuery.isLoading ? (
+          <p className="py-4 text-center text-sm text-muted-foreground">
+            {t("profitabilityLoading")}
+          </p>
+        ) : profitQuery.isError || !profitQuery.data ? (
+          <div className="flex flex-col items-center gap-3 py-4 text-center">
+            <p className="text-sm text-destructive">
+              {t("profitabilityError")}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void profitQuery.refetch()}
+            >
+              {te("retry")}
+            </Button>
+          </div>
+        ) : (
+          <ProfitabilityBody
+            data={profitQuery.data}
+            locale={locale}
+            onProfitPageChange={onProfitPageChange}
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProfitabilityBody({
+  data,
+  locale,
+  onProfitPageChange,
+}: {
+  data: CampaignProfitabilityResponse;
+  locale: "en" | "ar";
+  onProfitPageChange: (page: number | ((current: number) => number)) => void;
+}) {
+  const t = useTranslations("campaignDetails");
+
+  return (
+    <>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric
+          label={t("spend")}
+          value={formatCurrency(data.summary.spend, locale)}
+        />
+        <Metric
+          label={t("attributedRevenue")}
+          value={formatCurrency(data.summary.attributedRevenue, locale)}
+        />
+        <Metric
+          label={t("grossContribution")}
+          value={formatCurrency(data.summary.grossContribution, locale)}
+        />
+        <Metric
+          label={t("marginAfterAds")}
+          value={formatCurrency(data.summary.margin, locale)}
+        />
+        <Metric
+          label={t("roas")}
+          value={
+            data.summary.roas === null
+              ? "—"
+              : `${formatNumber(data.summary.roas, locale)}x`
+          }
+        />
+        <Metric
+          label={t("costPerOrder")}
+          value={
+            data.summary.costPerOrder === null
+              ? "—"
+              : formatCurrency(data.summary.costPerOrder, locale)
+          }
+        />
+        <Metric
+          label={t("averageOrderValue")}
+          value={
+            data.summary.averageOrderValue === null
+              ? "—"
+              : formatCurrency(data.summary.averageOrderValue, locale)
+          }
+        />
+        <Metric
+          label={t("attributedOrders")}
+          value={formatNumber(data.summary.orderCount, locale)}
+        />
+      </div>
+      <AttributedOrdersList
+        data={data}
+        locale={locale}
+        onProfitPageChange={onProfitPageChange}
+      />
+    </>
+  );
+}
+
+function AttributedOrdersList({
+  data,
+  locale,
+  onProfitPageChange,
+}: {
+  data: CampaignProfitabilityResponse;
+  locale: "en" | "ar";
+  onProfitPageChange: (page: number | ((current: number) => number)) => void;
+}) {
+  const t = useTranslations("campaignDetails");
+
+  if (data.orders.length === 0) {
+    return (
+      <p className="py-4 text-center text-sm text-muted-foreground">
+        {t("noAttributedOrders")}
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <p className="text-sm text-muted-foreground">
+        {t("attributedOrdersCount", {
+          count: data.pagination.totalAttributed,
+        })}
+      </p>
+      <ul className="divide-y divide-border rounded-md border border-border">
+        {data.orders.map((order) => (
+          <li
+            key={order.id}
+            className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">
+                <span dir="ltr">#{order.orderNumber ?? "—"}</span>{" "}
+                · {order.customer}
+              </p>
+              <p className="mt-1 truncate text-xs text-muted-foreground">
+                {t("orderItems", {
+                  count: order.items.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0,
+                  ),
+                })}
+                {order.deliveredAt
+                  ? ` · ${formatActivityDate(order.deliveredAt, locale)}`
+                  : ""}
+              </p>
+            </div>
+            <p className="shrink-0 text-sm font-semibold tabular-nums">
+              {t("orderNetProfit", {
+                amount: formatCurrency(order.financials.netProfit, locale),
+              })}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <div className="border-t border-border p-4">
+        <Pagination
+          currentPage={data.pagination.currentPage}
+          totalPages={data.pagination.totalPages}
+          hasNextPage={data.pagination.hasNextPage}
+          hasPreviousPage={data.pagination.hasPreviousPage}
+          onFirst={() => onProfitPageChange(1)}
+          onPrevious={() =>
+            onProfitPageChange((current: number) => current - 1)
+          }
+          onNext={() => onProfitPageChange((current: number) => current + 1)}
+          onLast={() => onProfitPageChange(data.pagination.totalPages)}
+        />
+      </div>
+    </>
   );
 }
 

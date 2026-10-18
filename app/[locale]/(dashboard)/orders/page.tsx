@@ -491,6 +491,8 @@ export default function OrdersPage() {
 
                           <TableHead>{t("tableCustomer")}</TableHead>
 
+                          <TableHead>{t("tableCampaign")}</TableHead>
+
                           <TableHead>{t("tableItems")}</TableHead>
 
                           <TableHead>{t("tableTotal")}</TableHead>
@@ -548,6 +550,13 @@ export default function OrdersPage() {
                                     </p>
                                   </div>
                                 </div>
+                              </TableCell>
+
+                              {/* Campaign */}
+                              <TableCell className="py-4">
+                                <p className="text-sm text-text-muted">
+                                  {order.campaign?.campaign ?? "—"}
+                                </p>
                               </TableCell>
 
                               {/* Items */}
@@ -666,6 +675,11 @@ export default function OrdersPage() {
                                 className="mt-0.5 text-xs text-text-muted"
                               >
                                 {order.phone}
+                              </p>
+
+                              <p className="mt-1 truncate text-xs text-text-muted">
+                                {t("tableCampaign")}:{" "}
+                                {order.campaign?.campaign ?? "—"}
                               </p>
                             </div>
                           </div>

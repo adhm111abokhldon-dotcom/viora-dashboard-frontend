@@ -32,11 +32,17 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { createOrder, getProducts, Product } from "@/lib/api";
+import {
+  createOrder,
+  getProducts,
+  Product,
+  type CampaignReference,
+} from "@/lib/api";
 import { useAppToast } from "@/lib/toast";
 import { useInvalidateAll } from "@/lib/queries";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import AddProductLoading from "@/components/AddProductLoading";
+import OrderCampaignSelector from "@/components/OrderCampaignSelector";
 import Image from "next/image";
 
 type FormErrors = {
@@ -99,6 +105,7 @@ export default function NewOrderPage() {
 
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
+  const [campaign, setCampaign] = useState<CampaignReference | null>(null);
 
   const [rows, setRows] = useState<Row[]>([
     {
@@ -314,6 +321,8 @@ export default function NewOrderPage() {
       deliveryCharged: deliveryChargedNumber,
 
       deliveryCost: deliveryCostNumber,
+
+      campaignKey: campaign?.key ?? null,
     });
   }
 
@@ -406,6 +415,16 @@ export default function NewOrderPage() {
                   ) : (
                     <FieldDescription>{t("phoneHint")}</FieldDescription>
                   )}
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="campaign">{t("campaign")}</FieldLabel>
+
+                  <OrderCampaignSelector
+                    id="campaign"
+                    value={campaign}
+                    onChange={setCampaign}
+                  />
                 </Field>
               </div>
             </FieldGroup>

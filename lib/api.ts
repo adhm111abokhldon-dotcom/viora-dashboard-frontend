@@ -161,6 +161,7 @@ export type CampaignReference = {
   key: string;
   store: "viora";
   accountId: string;
+  campaignId?: string | null;
   campaign: string;
 };
 
@@ -260,6 +261,87 @@ export async function getCampaignProducts(
   if (!response.ok) {
     throw new Error(await errorMessage(response, "Failed to fetch campaign"));
   }
+  return response.json();
+}
+
+export type CampaignProfitabilityOrder = {
+  id: string;
+  orderNumber: number | null;
+  customer: string;
+  phone: string;
+  status: OrderStatus;
+  deliveredAt: string | null;
+  items: OrderItem[];
+  deliveryCharged: number;
+  deliveryCost: number;
+  total: number;
+  financials: {
+    productRevenue: number;
+    productCost: number;
+    deliveryCharged: number;
+    deliveryCost: number;
+    grossContribution: number;
+    netProfit: number;
+  };
+};
+
+export type CampaignProfitabilityResponse = {
+  campaign: {
+    key: string;
+    store: "viora";
+    accountId: string;
+    campaignId: string | null;
+    campaign: string;
+  };
+  window: { from: string | null; to: string | null };
+  summary: {
+    spend: number;
+    attributedRevenue: number;
+    productCost: number;
+    deliveryCost: number;
+    grossContribution: number;
+    margin: number;
+    roas: number | null;
+    costPerOrder: number | null;
+    averageOrderValue: number | null;
+    orderCount: number;
+  };
+  orders: CampaignProfitabilityOrder[];
+  pagination: {
+    currentPage: number;
+    limit: number;
+    totalAttributed: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+};
+
+export async function getCampaignProfitability(
+  key: string,
+  {
+    from,
+    to,
+    page = 1,
+    limit = 10,
+  }: { from?: string; to?: string; page?: number; limit?: number } = {},
+): Promise<CampaignProfitabilityResponse> {
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (from) query.set("from", from);
+  if (to) query.set("to", to);
+
+  const response = await fetch(
+    `${API_URL}/advertising/campaigns/${encodeURIComponent(key)}/profitability?${query}`,
+  );
+  if (!response.ok) {
+    throw new Error(
+      await errorMessage(response, "Failed to fetch campaign profitability"),
+    );
+  }
+
   return response.json();
 }
 
@@ -886,6 +968,10 @@ export type Order = {
   total: number;
   profit: number;
   status: OrderStatus;
+  /** Campaign the order was attributed to when placed (stored snapshot). */
+  campaign?: CampaignReference | null;
+  /** When the order was first delivered. */
+  deliveredAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -923,6 +1009,8 @@ export type CreateOrderData = {
   items: CreateOrderItem[];
   deliveryCharged: number;
   deliveryCost: number;
+  /** Optional campaign the order is attributed to. */
+  campaignKey?: string | null;
 };
 
 // بيرجّع رسالة السيرفر (مثلاً "Not enough stock for ...") بدل رسالة عامة
