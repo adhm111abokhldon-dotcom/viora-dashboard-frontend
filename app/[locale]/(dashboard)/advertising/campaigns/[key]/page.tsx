@@ -63,7 +63,10 @@ export default function CampaignDetailsPage() {
   const profitQuery = useQuery({
     queryKey: ["campaignProfitability", key, profitPage],
     queryFn: () =>
-      getCampaignProfitability(key, { page: profitPage, limit: PROFIT_PAGE_SIZE }),
+      getCampaignProfitability(key, {
+        page: profitPage,
+        limit: PROFIT_PAGE_SIZE,
+      }),
     enabled: Boolean(key),
   });
 
@@ -144,7 +147,10 @@ export default function CampaignDetailsPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric label={t("spend")} value={formatCurrency(campaign.spend, locale)} />
+        <Metric
+          label={t("spend")}
+          value={formatCurrency(campaign.spend, locale)}
+        />
         <Metric
           label={t("allocatedSpend")}
           value={formatCurrency(campaign.allocatedSpend, locale)}
@@ -153,8 +159,14 @@ export default function CampaignDetailsPage() {
           label={t("unallocatedSpend")}
           value={formatCurrency(campaign.unallocatedSpend, locale)}
         />
-        <Metric label={t("messages")} value={formatNumber(campaign.messages, locale)} />
-        <Metric label={t("clicks")} value={formatNumber(campaign.clicks, locale)} />
+        <Metric
+          label={t("messages")}
+          value={formatNumber(campaign.messages, locale)}
+        />
+        <Metric
+          label={t("clicks")}
+          value={formatNumber(campaign.clicks, locale)}
+        />
         <Metric
           label={t("costPerMessage")}
           value={
@@ -163,7 +175,10 @@ export default function CampaignDetailsPage() {
               : formatCurrency(campaign.costPerMessage, locale)
           }
         />
-        <Metric label={t("linkedCount")} value={formatNumber(campaign.linkedProductCount, locale)} />
+        <Metric
+          label={t("linkedCount")}
+          value={formatNumber(campaign.linkedProductCount, locale)}
+        />
         <Metric
           label={t("firstActivity")}
           value={formatActivityDate(campaign.firstActivity, locale)}
@@ -185,7 +200,9 @@ export default function CampaignDetailsPage() {
         <CardHeader className="gap-4 border-b border-border sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-base">{t("productsTitle")}</CardTitle>
-            <p className="mt-1 text-sm text-muted-foreground">{t("productsDescription")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("productsDescription")}
+            </p>
           </div>
           <div className="relative w-full sm:max-w-xs">
             <Search className="pointer-events-none absolute inset-s-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -218,10 +235,15 @@ export default function CampaignDetailsPage() {
                         href={`/products/${product._id}`}
                         className="min-w-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
-                        <p className="truncate text-sm font-medium">{product.name}</p>
+                        <p className="truncate text-sm font-medium">
+                          {product.name}
+                        </p>
                         <p className="mt-1 truncate text-xs text-muted-foreground">
-                          {product.category} · {formatCurrency(product.price, locale)} ·{" "}
-                          {t("stock", { count: formatNumber(product.stock, locale) })}
+                          {product.category} ·{" "}
+                          {formatCurrency(product.price, locale)} ·{" "}
+                          {t("stock", {
+                            count: formatNumber(product.stock, locale),
+                          })}
                           {product.linked
                             ? ` · ${t("productAllocation")}: ${formatCurrency(product.allocation, locale)}`
                             : ""}
@@ -430,8 +452,8 @@ function AttributedOrdersList({
           >
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">
-                <span dir="ltr">#{order.orderNumber ?? "—"}</span>{" "}
-                · {order.customer}
+                <span dir="ltr">#{order.orderNumber ?? "—"}</span> ·{" "}
+                {order.customer}
               </p>
               <p className="mt-1 truncate text-xs text-muted-foreground">
                 {t("orderItems", {
@@ -489,3 +511,5 @@ function formatActivityDate(value: string | null, locale: "en" | "ar") {
     ? "—"
     : new Intl.DateTimeFormat(locale).format(date);
 }
+
+// hddd
